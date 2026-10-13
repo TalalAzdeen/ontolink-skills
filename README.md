@@ -4,7 +4,6 @@
 
 OntoLink connects sequential agent skills through an OWL knowledge model and a persistent project graph. It retrieves the current task, relevant dependencies, evidence and signals instead of repeatedly loading every skill and the complete project history.
 
-This repository contains eight dedicated OntoLink skills. Existing full-stack engineering skills remain separate optional adapters. OntoLink coordinates their use; it does not replace their implementation capabilities or bundle the previous full-stack collection.
 
 ## How the parts connect
 
