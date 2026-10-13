@@ -1,0 +1,58 @@
+{
+  "name": "OntoLink Skills",
+  "repository": "ontolink-skills",
+  "version": "1.0.0",
+  "ontology": "skills/ontolink-skills/assets/ontolink.owl",
+  "skills": [
+    {
+      "name": "ontolink-skills",
+      "path": "skills/ontolink-skills",
+      "role": "coordinator",
+      "sequence": 0
+    },
+    {
+      "name": "ontolink-discovery",
+      "path": "skills/ontolink-discovery",
+      "role": "phase",
+      "sequence": 1
+    },
+    {
+      "name": "ontolink-architecture",
+      "path": "skills/ontolink-architecture",
+      "role": "phase",
+      "sequence": 2
+    },
+    {
+      "name": "ontolink-planning",
+      "path": "skills/ontolink-planning",
+      "role": "phase",
+      "sequence": 3
+    },
+    {
+      "name": "ontolink-implementation",
+      "path": "skills/ontolink-implementation",
+      "role": "phase",
+      "sequence": 4
+    },
+    {
+      "name": "ontolink-verification",
+      "path": "skills/ontolink-verification",
+      "role": "phase",
+      "sequence": 5
+    },
+    {
+      "name": "ontolink-delivery",
+      "path": "skills/ontolink-delivery",
+      "role": "phase",
+      "sequence": 6
+    },
+    {
+      "name": "ontolink-monitoring",
+      "path": "skills/ontolink-monitoring",
+      "role": "phase",
+      "sequence": 7
+    }
+  ],
+  "engineeringAdapters": "External; not bundled",
+  "tokenReduction": "Selective retrieval objective; no measured savings asserted"
+}
