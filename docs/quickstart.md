@@ -1,7 +1,7 @@
 # Quickstart
 
 1. Install the coordinator and seven phase skills. Resolve engineering adapters separately.
-2. Initialize one state at the real project root. Never overwrite an existing state to clear blockers.
+2. The agent automatically runs `python <skill-root>/scripts/mediator.py bootstrap --root "<project-root>"` on first project use. This creates or validates and reuses root `knowledge.owl`; no separate user setup request is needed. Installation alone does not run code. Preserve an explicitly configured canonical state and never overwrite it to clear blockers.
 3. Query `context`; read only the returned `workflow_skill` and relevant source excerpts.
 4. Perform the phase work and create real artifacts and proof files under that root.
 5. Hash each artifact and proof file with SHA-256. Register the artifact, then evidence supporting its exact current content hash.

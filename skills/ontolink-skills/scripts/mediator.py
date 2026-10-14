@@ -10,6 +10,7 @@ from pathlib import Path
 import re
 import tempfile
 from datetime import datetime, timezone
+from xml.etree.ElementTree import ParseError
 from rdf_store import Store, O, TYPE
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -374,6 +375,33 @@ def initialize(name, title, output, ontology):
     return graph
 
 
+def bootstrap(root, ontology, name=None, title=None):
+    """Create or validate root state without resetting an existing project."""
+    root = root.resolve()
+    if not root.is_dir():
+        raise ValueError('Project root must be an existing directory')
+    path = root / 'knowledge.owl'
+    if path.is_symlink():
+        raise ValueError('Canonical state must not be a symlink')
+    lock = path.with_suffix('.owl.lock')
+    fd = os.open(lock, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+    try:
+        os.close(fd)
+        created = not path.exists()
+        if created:
+            inferred = re.sub(r'[^a-z0-9]+', '-', root.name.lower()).strip('-')[:64] or 'project'
+            graph = initialize(name or inferred, title or root.name, path, ontology)
+        else:
+            try:
+                graph = Store.read(path)
+            except ParseError as error:
+                raise ValueError('Invalid canonical RDF/XML state; preserve and repair it') from error
+            validate(graph, root, ontology)
+        return {'state': str(path), 'created': created, 'context': snapshot(graph, ontology, root)}
+    finally:
+        lock.unlink(missing_ok=True)
+
+
 def update_file(path, record, expected, ontology):
     # Lock file plus compare-and-swap prevents two cooperating writers from losing updates.
     lock = path.with_suffix(path.suffix + '.lock')
@@ -406,6 +434,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--ontology', type=Path, default=ONTOLOGY)
     sub = parser.add_subparsers(dest='command', required=True)
+    boot = sub.add_parser('bootstrap', help='Create or reuse knowledge.owl at the project root')
+    boot.add_argument('--root', type=Path, default=Path.cwd())
+    boot.add_argument('--project'); boot.add_argument('--title')
     init = sub.add_parser('init'); init.add_argument('--project', required=True); init.add_argument('--title', required=True); init.add_argument('--output', type=Path, required=True)
     for command in ['validate', 'context', 'record']:
         child = sub.add_parser(command); child.add_argument('--state', type=Path, required=True)
@@ -415,7 +446,9 @@ def main():
             child.add_argument('--input', type=Path, required=True); child.add_argument('--expected-revision', type=int, required=True)
     args = parser.parse_args(); ontology = Store.read(args.ontology)
     try:
-        if args.command == 'init':
+        if args.command == 'bootstrap':
+            result = bootstrap(args.root, ontology, args.project, args.title)
+        elif args.command == 'init':
             g = initialize(args.project, args.title, args.output, ontology); result = snapshot(g, ontology, args.output.parent)
         elif args.command == 'record':
             result = update_file(args.state, json.loads(args.input.read_text()), args.expected_revision, ontology)

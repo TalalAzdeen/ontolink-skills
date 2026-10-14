@@ -7,6 +7,8 @@ description: Execute the plan phase of an OntoLink project using the ontology-me
 
 Resolve `ontolink-skills` by exact name. Read its execution contract and run its mediator against the real project state. Do not rely on platform-generated folder IDs or copy a second ontology into this skill.
 
+Before phase work, apply the coordinator's mandatory project bootstrap: create or reuse `knowledge.owl` at the actual project root without requiring a separate user request. Preserve any explicitly configured canonical state path.
+
 1. Read the current context packet for the selected task. Confirm its phase is `plan` and its prerequisites are satisfied before execution. For monitoring during an earlier phase, inspect read-only state and report the actual active phase; do not bypass phase closure guards.
 2. Break accepted contracts into owned tasks, dependencies, acceptance outcomes and checkable risks. Record messages as drafts unless actually dispatched.
 3. Read [phase-contract.md](references/phase-contract.md). Apply the relevant original engineering skill instructions and actual project capabilities; never claim that reading their names executes them.

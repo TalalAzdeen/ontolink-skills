@@ -16,7 +16,7 @@ The OWL phase individuals supply this sequence and routing. Do not introduce a p
 
 ## State ownership
 
-Keep the state at the project root as `knowledge.owl`. Paths in artifacts and proof records are relative to its directory. All referenced files must remain within that directory; symlink escapes and absolute paths are rejected. Keep secrets and private personal data out of graph records, prompts and committed proof logs.
+On first project use, automatically run the coordinator bootstrap to create or reuse `knowledge.owl` at the real project root. Preserve an explicitly configured canonical state path and never create a second graph. Installation alone does not execute the bootstrap. Keep the default state at the project root as `knowledge.owl`. Paths in artifacts and proof records are relative to its directory. All referenced files must remain within that directory; symlink escapes and absolute paths are rejected. Keep secrets and private personal data out of graph records, prompts and committed proof logs.
 
 The mediator stores supported triples, applies task/phase guards and atomically updates cooperating writers through a lock and expected revision. Do not clear a lock simply to bypass another writer; investigate a stale lock after establishing the owning process is no longer active. Never edit the state behind an active writer.
 
