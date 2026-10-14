@@ -139,3 +139,11 @@ Markdown serves human explanation, narrative decisions and documentation. The on
 Keep the graph in the project alongside its source, keep secrets out of records and proof logs, and use Markdown for the explanation people need. This combination supports repeatable AI-assisted engineering with durable context and reviewable evidence.
 
 **Implementation references:** [Coordinator instructions](skills/ontolink-skills/SKILL.md), [Python mediator](skills/ontolink-skills/scripts/mediator.py), [execution contract](skills/ontolink-skills/references/execution-contract.md), [knowledge model](docs/knowledge-model.md), and [lifecycle](docs/lifecycle.md).
+
+## Optional Project Intelligence extension
+
+For large codebases, OntoLink can build a **generated, non-canonical code index** at `.ontolink/index/project-index.json`. This keeps source-code symbols out of `knowledge.owl`: the OWL state remains authoritative for project knowledge and execution state, while the generated index can be deleted and rebuilt at any time.
+
+The optional extension supports incremental indexing, local BM25 retrieval across canonical project knowledge plus code/file hints, and a backward-compatible context wrapper that preserves the mediator's existing fields. It does not change the seven-phase lifecycle, completion gates, evidence rules or revision checks.
+
+See [Project Intelligence extension](docs/project-intelligence.md).

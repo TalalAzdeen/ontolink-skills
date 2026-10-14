@@ -1,7 +1,7 @@
 {
   "name": "OntoLink Skills",
   "repository": "ontolink-skills",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "ontology": "skills/ontolink-skills/assets/ontolink.owl",
   "skills": [
     {
@@ -54,5 +54,11 @@
     }
   ],
   "engineeringAdapters": "External; not bundled",
-  "tokenReduction": "Selective retrieval objective; no measured savings asserted"
+  "tokenReduction": "Selective retrieval objective; no measured savings asserted",
+  "projectIntelligence": {
+    "mode": "optional-generated-index",
+    "index": ".ontolink/index/project-index.json",
+    "canonicalState": "knowledge.owl remains authoritative",
+    "retrieval": "local BM25 plus canonical graph-neighborhood signals"
+  }
 }

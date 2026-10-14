@@ -43,3 +43,10 @@ An OWL file is not inherently cheaper than Markdown. The saving mechanism is sel
 - Recording a Message does not transmit it. Send only when the user or an explicitly invoked skill authorizes the actual destination and action; store a real receipt when marking SENT.
 - The parser supports this named-node RDF/XML representation; it is not a complete OWL parser or reasoner. Unsupported constructs fail explicitly. Semantic reasoning, external receipt verification and statistical calibration require actual tools and evidence.
 - Monitoring runs during active work and resume. Do not claim an always-on service without a configured automation.
+
+
+## Optional Project Intelligence
+
+For large or unfamiliar codebases, use the separate `project_intelligence.py` helper when code/file retrieval would materially reduce discovery work. Keep generated code knowledge outside `knowledge.owl` at `<project-root>/.ontolink/index/project-index.json`. The generated index is navigational only: it may identify relevant files, symbols or routes, but it is not evidence, does not override canonical graph facts, and cannot mark work complete.
+
+Build or incrementally refresh the index with `project_intelligence.py index`; use `search` for focused retrieval or `context` to append a `project_intelligence` section to the existing mediator packet. Preserve all existing mediator fields and lifecycle rules. Read [project-intelligence.md](../../docs/project-intelligence.md) for the boundary and commands.
