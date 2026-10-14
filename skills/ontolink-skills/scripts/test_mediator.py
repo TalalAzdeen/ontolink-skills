@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
-from mediator import initialize, apply_record, snapshot, validate, update_file, sha, ONTOLOGY
+from mediator import bootstrap, initialize, apply_record, snapshot, validate, update_file, sha, ONTOLOGY
 from rdf_store import Store, O, TYPE
 
 
@@ -177,6 +177,39 @@ class MediatorTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             initialize('fixture', 'Duplicate', self.state, self.ontology)
         self.assertEqual(before, self.state.read_bytes())
+
+    def test_bootstrap_creates_root_state_and_reuses_bytes(self):
+        target = self.root / 'New Project'; target.mkdir()
+        result = bootstrap(target, self.ontology)
+        state = target / 'knowledge.owl'
+        self.assertTrue(result['created'])
+        self.assertEqual(result['context']['workflow_skill'], 'ontolink-discovery')
+        before = state.read_bytes()
+        reused = bootstrap(target, self.ontology, 'other', 'Other')
+        self.assertFalse(reused['created'])
+        self.assertEqual(before, state.read_bytes())
+
+    def test_bootstrap_preserves_invalid_state(self):
+        self.state.write_text('invalid state')
+        before = self.state.read_bytes()
+        with self.assertRaises(ValueError):
+            bootstrap(self.root, self.ontology)
+        self.assertEqual(before, self.state.read_bytes())
+        self.assertFalse(self.state.with_suffix('.owl.lock').exists())
+
+    def test_bootstrap_respects_writer_lock(self):
+        lock = self.state.with_suffix('.owl.lock'); lock.write_text('active writer')
+        before = self.state.read_bytes()
+        with self.assertRaises(FileExistsError):
+            bootstrap(self.root, self.ontology)
+        self.assertEqual(before, self.state.read_bytes())
+        self.assertTrue(lock.exists())
+
+    def test_bootstrap_rejects_symlink(self):
+        target = self.root / 'linked'; target.mkdir()
+        (target / 'knowledge.owl').symlink_to(self.state)
+        with self.assertRaises(ValueError):
+            bootstrap(target, self.ontology)
 
     def test_unsupported_rdfxml_constructs_are_rejected(self):
         path = self.root / 'invalid.owl'
