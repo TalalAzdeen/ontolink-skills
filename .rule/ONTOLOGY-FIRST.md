@@ -133,5 +133,5 @@ run setup against the existing project. Pause active writers. Incoming validatio
 failure stops the update; do not reset the graph or infer a schema migration.
 Failed copy/refresh restores replaced package/rule/host paths. Keep the backups
 and inspect the reported error; a first-created graph is retained if later setup
-fails. See the bilingual README for complete commands and installation/update
+fails. See the README for complete commands and installation/update
 prompts. No unattended network updater is installed.

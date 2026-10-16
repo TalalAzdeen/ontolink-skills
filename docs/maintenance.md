@@ -8,7 +8,7 @@ that directory are changed by this maintenance revision.
 
 | Finding | Action |
 | --- | --- |
-| Operational rules were duplicated across overview and host instructions | Keep the detailed bilingual README for readers and the canonical operational policy in `.rule/ONTOLOGY-FIRST.md`. |
+| Operational rules were duplicated across overview and host instructions | Keep the English README for readers and the canonical operational policy in `.rule/ONTOLOGY-FIRST.md`. |
 | Five host files duplicated policy and assumed `.agents/skills` | Keep short discovery pointers; resolve the real installed coordinator path. |
 | Legacy `.ontolinkRule/` directory | Rename to `.rule/`; update every external reference. |
 | Loose record JSON and generated text had no shared placement rule | Require the fixed `.ontolink/records`, `proofs`, `artifacts` paths. |
@@ -77,8 +77,8 @@ paths and merges managed host blocks. Failure restores replaced package/rule
 paths; it does not migrate or reset graph data. Tests cover an existing project
 with a registered artifact and proof, plus a newly added command.
 
-The README retains the original explanation and diagram, adds installation and
-update prompts/commands, and presents English before Arabic. `sitemap.xml` covers
+The English README explains the workflow, installation and updates, with the
+approved project-ontology image and the detailed ontology update-cycle diagram. `sitemap.xml` covers
 all eight skill entries, their Markdown references and public documentation.
 The sitemap is a repository discovery file; Google submission and indexing of a
 separately hosted site require that site's real URLs and ownership configuration.
