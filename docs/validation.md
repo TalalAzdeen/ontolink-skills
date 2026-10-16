@@ -17,3 +17,9 @@ The external adapter suite uses temporary projects to check fixed output paths,
 first-use reuse, automatic post-record refresh, stale revisions, writer locks,
 explicit state paths, malformed input, symlink rejection and post-commit
 refresh failures. CI runs the same check on pull requests and pushes.
+
+The complete-setup suite checks initial installation, state and proof preservation
+after adding a command, unrelated host/skill preservation, copy-failure rollback,
+invalid existing state and symlink boundaries. Sitemap checks cover all eight
+skill entry points and their Markdown references. Third-party CLI examples are
+documented from their upstream project and are not part of this test suite.

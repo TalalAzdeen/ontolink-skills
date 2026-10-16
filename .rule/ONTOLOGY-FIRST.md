@@ -115,3 +115,23 @@ Move loose OntoLink record JSON/text into `.ontolink` only after checking graph
 references; changing a recorded path requires a mediator record and fresh hashes.
 Do not mass-move application files, remove host-discovery directories, delete
 proofs or change anything inside installed `skills/` for this migration.
+
+## Complete setup and existing-project updates
+
+Use `python /path/to/distribution/scripts/project_setup.py --project /path/to/project
+--skills-dir .agents/skills` from a separate distribution checkout. Use the actual
+host skill directory and `--state` for an existing explicit canonical path. The
+same command installs new projects or updates existing copies, including newly
+added package/rule files. It preserves unrelated skills and host instructions,
+backs up replaced paths under `.ontolink/backups/`, and validates compatibility
+before replacing an existing installation. Existing graph bytes and durable
+records/proofs/artifacts are preserved. The command intentionally performs setup
+and context refresh; copying files manually still does not execute code.
+
+First fast-forward the distribution with `git pull --ff-only origin main`, then
+run setup against the existing project. Pause active writers. Incoming validation
+failure stops the update; do not reset the graph or infer a schema migration.
+Failed copy/refresh restores replaced package/rule/host paths. Keep the backups
+and inspect the reported error; a first-created graph is retained if later setup
+fails. See the bilingual README for complete commands and installation/update
+prompts. No unattended network updater is installed.

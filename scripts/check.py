@@ -29,4 +29,6 @@ subprocess.run([sys.executable,str(core/'scripts/mediator.py'),'validate','--sta
 subprocess.run([sys.executable,str(core/'scripts/test_mediator.py')],check=True)
 subprocess.run([sys.executable,str(core/'scripts/test_project_intelligence.py')],check=True)
 subprocess.run([sys.executable,str(root/'scripts/test_project_rules.py')],check=True)
+subprocess.run([sys.executable,str(root/'scripts/test_project_setup.py')],check=True)
+subprocess.run([sys.executable,str(root/'scripts/generate_sitemap.py'),'--check'],check=True)
 print(f'PASS: eight skill entry points, {len(owl)} ontology triples, equivalent Turtle mirror, SHACL example and mediator/intelligence/project-adapter tests')

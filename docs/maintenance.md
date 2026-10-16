@@ -8,7 +8,7 @@ that directory are changed by this maintenance revision.
 
 | Finding | Action |
 | --- | --- |
-| Long README repeated first-use, evidence and context rules | Keep an installation overview; put operational policy in `.rule/ONTOLOGY-FIRST.md`. |
+| Operational rules were duplicated across overview and host instructions | Keep the detailed bilingual README for readers and the canonical operational policy in `.rule/ONTOLOGY-FIRST.md`. |
 | Five host files duplicated policy and assumed `.agents/skills` | Keep short discovery pointers; resolve the real installed coordinator path. |
 | Legacy `.ontolinkRule/` directory | Rename to `.rule/`; update every external reference. |
 | Loose record JSON and generated text had no shared placement rule | Require the fixed `.ontolink/records`, `proofs`, `artifacts` paths. |
@@ -67,3 +67,18 @@ Run `python scripts/check.py` after each distribution update. Automated CI
 checks the repository; each target project still needs `start` after installation
 or update to validate its own state. Nothing silently downloads or applies a
 remote revision.
+
+## Distribution setup, safe updates and documentation discovery
+
+`project_setup.py` copies all catalogued packages and external rules into an
+existing application project. It preserves canonical graph bytes and durable
+records/proofs/artifacts, validates incoming compatibility, backs up replaced
+paths and merges managed host blocks. Failure restores replaced package/rule
+paths; it does not migrate or reset graph data. Tests cover an existing project
+with a registered artifact and proof, plus a newly added command.
+
+The README retains the original explanation and diagram, adds installation and
+update prompts/commands, and presents English before Arabic. `sitemap.xml` covers
+all eight skill entries, their Markdown references and public documentation.
+The sitemap is a repository discovery file; Google submission and indexing of a
+separately hosted site require that site's real URLs and ownership configuration.

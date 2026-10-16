@@ -1,5 +1,12 @@
 # Quickstart
 
+For complete terminal installation or an existing-project update, run
+`python /path/to/distribution/scripts/project_setup.py --project /path/to/project
+--skills-dir .agents/skills` using the target host's actual directory. The same
+command backs up replaced package/rule files and preserves existing project
+knowledge. See the [bilingual README](../README.md) for the two update commands
+and agent prompts. Manual installation remains supported below.
+
 Install the eight skills and copy `.rule/` to the target project. Merge the
 applicable host entry point without replacing existing user instructions.
 The [canonical rule](../.rule/ONTOLOGY-FIRST.md) defines first use, file placement,
