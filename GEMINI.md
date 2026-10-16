@@ -1,5 +1,0 @@
-# OntoLink project instructions
-
-Before project work, read [.rule/ONTOLOGY-FIRST.md](.rule/ONTOLOGY-FIRST.md).
-Resolve the installed `ontolink-skills` coordinator and run the policy's `start`
-command first. Keep generated records and text in the fixed `.ontolink/` directory.
