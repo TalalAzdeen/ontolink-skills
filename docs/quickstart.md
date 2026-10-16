@@ -1,20 +1,62 @@
 # Quickstart
 
-1. Install the coordinator and seven phase skills. Resolve engineering adapters separately.
-2. The agent automatically runs `python <skill-root>/scripts/mediator.py bootstrap --root "<project-root>"` on first project use. This creates or validates and reuses root `knowledge.owl`; no separate user setup request is needed. Installation alone does not run code. Preserve an explicitly configured canonical state and never overwrite it to clear blockers.
-3. Query `context`; read only the returned `workflow_skill` and relevant source excerpts.
-4. Perform the phase work and create real artifacts and proof files under that root.
-5. Hash each artifact and proof file with SHA-256. Register the artifact, then evidence supporting its exact current content hash.
-6. Record required outcomes with the observed revision. Query again after a handoff.
+Install the eight skills and copy `.rule/` to the target project. Merge the
+applicable host entry point without replacing existing user instructions.
+The [canonical rule](../.rule/ONTOLOGY-FIRST.md) defines first use, file placement,
+updates and cleanup. All paths below assume the default root `knowledge.owl`.
+
+## Start or resume automatically
+
+On the first project-scoped invocation and every resume, the agent runs:
 
 ```sh
-python skills/ontolink-skills/scripts/mediator.py record   --state /path/to/project/knowledge.owl --input /path/to/project/record.json --expected-revision 0
-python skills/ontolink-skills/scripts/mediator.py context   --state /path/to/project/knowledge.owl --task task-build --budget 4000
-python skills/ontolink-skills/scripts/mediator.py validate   --state /path/to/project/knowledge.owl
+python .rule/ontolink.py start --root . --skill-root /installed/ontolink-skills
 ```
 
-Read the coordinator's [record contract](../skills/ontolink-skills/references/record-contract.md) for exact field names and allowed values. `project` is the project relationship ID. `belongsTo` is generated automatically for project records. State writes use an exclusive lock, compare the expected revision, and replace the file atomically. On conflict, reread rather than forcing the write.
+Use `--state path/to/existing.owl` on every command for an explicit canonical
+state. Never initialize another graph. Generated `.ontolink/` files are beside
+that state, preserving the mediator's relative-path contract.
 
-The example project is synthetic initialization data with seven incomplete phase tasks. The JSON signal examples are illustrations, not real assessments or claims about an application. Preserve unknown uncertainty values by omitting `value`.
+Read the returned phase skill and relevant source excerpts; perform real work.
+Put generated phase text under `.ontolink/artifacts/` and proof logs under
+`.ontolink/proofs/`. Hash current artifacts and proofs with SHA-256, inspect
+results, and create a new payload under `.ontolink/records/` for each record.
+Application files remain at their existing paths.
 
-Use a task-focused query to inspect blocked work. If no task is ready, resolve the reported blocker or dependency instead of advancing a phase. Recording a recommendation does not execute it. Recording a message does not transmit it.
+## Record and refresh
+
+Read the coordinator's [record contract](../skills/ontolink-skills/references/record-contract.md)
+for exact types/fields. Use the observed revision; this example records a
+requirement, without claiming that a phase is complete:
+
+```sh
+mkdir -p .ontolink/records
+cat > .ontolink/records/scope-001.json <<'JSON'
+{"id":"scope","type":"Requirement","title":"Agreed project scope"}
+JSON
+python .rule/ontolink.py record --root . --skill-root /installed/ontolink-skills \
+  --input .ontolink/records/scope-001.json --expected-revision 0
+```
+
+Successful records produce a revision receipt, validate state and replace
+`.ontolink/context.json` automatically. Preserve submitted payloads and their
+receipts. A revision conflict requires rereading and reconciling. If the writer
+committed but refresh failed, do not replay the payload; repair the reported
+failure and run:
+
+```sh
+python .rule/ontolink.py context --root . --skill-root /installed/ontolink-skills
+```
+
+Record artifacts, their current proof evidence, and task completion separately
+with each fresh revision. DONE still requires all original mediator gates.
+
+## Optional generated index
+
+```sh
+python .rule/ontolink.py start --root . --skill-root /installed/ontolink-skills --index
+```
+
+Once the index exists, `start`, `context` and successful `record` commands refresh
+it. The index is navigational and never completion evidence. No background
+watcher or network update is installed. Details: [Project Intelligence](project-intelligence.md).

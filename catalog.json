@@ -1,7 +1,7 @@
 {
   "name": "OntoLink Skills",
   "repository": "ontolink-skills",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "ontology": "skills/ontolink-skills/assets/ontolink.owl",
   "skills": [
     {
@@ -60,5 +60,12 @@
     "index": ".ontolink/index/project-index.json",
     "canonicalState": "knowledge.owl remains authoritative",
     "retrieval": "local BM25 plus canonical graph-neighborhood signals"
+  },
+  "projectRules": {
+    "policy": ".rule/ONTOLOGY-FIRST.md",
+    "adapter": ".rule/ontolink.py",
+    "generatedDirectory": ".ontolink",
+    "canonicalState": "knowledge.owl",
+    "refresh": "validate and query context after each successful adapter record"
   }
 }

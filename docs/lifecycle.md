@@ -20,4 +20,4 @@ Discovery captures goals, actors, acceptance criteria and unresolved facts. Arch
 
 Changing a dependency may reopen already accepted work. Resolving a blocker removes the obstacle but does not manufacture completion or restore stale evidence. Generate a fresh context packet after every material state change.
 
-Engineering adapters are references to installed capabilities. `full-stack`, NEXUS and Template skills remain outside this repository; preserve the native stack when the project does not use Template. Visible ChatGPT department conversations require the corresponding installed skill and actual browser operations, not merely graph nodes.
+Engineering adapters are optional installed capabilities; preserve the target project's native stack. Project startup, generated-file placement and refresh follow the [canonical rule](../.rule/ONTOLOGY-FIRST.md).

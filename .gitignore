@@ -2,3 +2,8 @@ __pycache__/
 *.pyc
 .venv/
 *.owl.lock
+
+# Regenerable context and code index only; retain records and proofs.
+.ontolink/context.json
+.ontolink/index/
+.ontolink/session.lock

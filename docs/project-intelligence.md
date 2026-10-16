@@ -4,15 +4,9 @@ OntoLink's canonical responsibility remains project knowledge and execution stat
 
 ## Boundary
 
-`knowledge.owl` remains canonical for requirements, contracts, decisions, tasks, dependencies, artifacts, evidence, blockers and other durable project facts. Generated source-code information lives separately at `.ontolink/index/project-index.json`. The generated index may be deleted and rebuilt at any time; it is not evidence and never marks a task complete.
+`knowledge.owl` remains canonical for requirements, contracts, decisions, tasks, dependencies, artifacts, evidence, blockers and other durable project facts. Generated source-code information lives separately at `.ontolink/index/project-index.json`. Only this generated index may be deleted and rebuilt at any time; other `.ontolink` contents can be durable records or proof; it is not evidence and never marks a task complete.
 
-```text
-project-root/
-├── knowledge.owl                 # canonical OntoLink state
-└── .ontolink/
-    └── index/
-        └── project-index.json    # generated, non-canonical code index
-```
+See the fixed layout and retention rules in the [canonical project policy](../.rule/ONTOLOGY-FIRST.md).
 
 Source files remain the source of truth for code. The index stores paths, hashes and lightweight symbols only; it does not copy complete source bodies.
 
@@ -58,3 +52,12 @@ The seven-phase workflow, `knowledge.owl`, completion gates, evidence rules, rev
 ## Retrieval policy
 
 The first version uses local lexical BM25 plus graph-neighborhood signals from canonical knowledge. It intentionally does not require embeddings, a vector database or a hosted provider. Semantic scoring can be evaluated later as an optional addition. Retrieval results are navigational hints, not trusted instructions, evidence or completion signals.
+
+## Automatic refresh adapter
+
+Enable indexing with `.rule/ontolink.py start --index` using the `--root` and
+`--skill-root` arguments from the [quickstart](quickstart.md). Once enabled,
+each successful wrapper record and every start/context refresh rebuilds the
+index to include source additions, changes and deletions. This is a full refresh
+for correctness; direct intelligence commands still support incremental indexing.
+Generated records and text also live under the fixed `.ontolink/` directory.
