@@ -1,0 +1,6 @@
+---
+description: Mandatory OntoLink ontology-first workflow for every task
+alwaysApply: true
+---
+
+Before research, reading arbitrary specs, or editing code, follow .ontolinkRule/ONTOLOGY-FIRST.md. First run python .agents/skills/ontolink-skills/scripts/mediator.py context --state knowledge.owl from the target project root. If knowledge.owl is missing, bootstrap through the installed mediator and then query context. Read only packet-listed artifacts and the selected phase skill. Never hand-edit ontology state; record changes through the mediator with --expected-revision. Enforce phase order and require current PASS evidence with exact SHA-256 hashes before DONE.
