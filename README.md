@@ -147,3 +147,40 @@ For large codebases, OntoLink can build a **generated, non-canonical code index*
 The optional extension supports incremental indexing, local BM25 retrieval across canonical project knowledge plus code/file hints, and a backward-compatible context wrapper that preserves the mediator's existing fields. It does not change the seven-phase lifecycle, completion gates, evidence rules or revision checks.
 
 See [Project Intelligence extension](docs/project-intelligence.md).
+
+
+## Where to install the Ontology-First rule
+
+The canonical rule and the agent-host entry points are included in this repository. To make a host apply the rule to a **different application repository**, copy the applicable files into that application's repository root; rules stored only in the OntoLink Skills repository do not automatically govern a separate repository.
+
+| Purpose / host | File to place in the target project | How to use it |
+| --- | --- | --- |
+| Full canonical policy | `.ontolinkRule/ONTOLOGY-FIRST.md` | Keep the detailed rule here. |
+| General agent instruction | `AGENTS.md` | Recommended root entry point for compatible coding agents. |
+| Cursor | `.cursor/rules/ontology-first.mdc` | Cursor rule with `alwaysApply: true`. |
+| Cline | `.clinerules` | Project-level Cline instructions. |
+| Gemini CLI | `GEMINI.md` | Project-level Gemini instructions. |
+| GitHub Copilot | `.github/copilot-instructions.md` | Repository-wide Copilot instructions. |
+
+Keep one canonical copy of the detailed policy at `.ontolinkRule/ONTOLOGY-FIRST.md`; host-specific files should point to it and repeat the mandatory first action. Do not create unrelated rule files or duplicate the full policy in every host file.
+
+### Required project layout
+
+In the **target application repository**, the rule files sit beside the application's source, and the project's own `knowledge.owl` sits at its root (unless the project already has an explicitly configured canonical state path). The mediator path depends on how the OntoLink skill was installed: resolve the actual installed `ontolink-skills/scripts/mediator.py` path rather than assuming `.agents/skills/...` exists in every environment. Query context first; if the project ontology is absent, bootstrap it through that mediator and then query context.
+
+Example layout:
+
+```text
+<target-project>/
+├── .ontolinkRule/
+│   └── ONTOLOGY-FIRST.md
+├── AGENTS.md
+├── .cursor/rules/ontology-first.mdc       # Cursor, if used
+├── .clinerules                             # Cline, if used
+├── GEMINI.md                               # Gemini CLI, if used
+├── .github/copilot-instructions.md         # Copilot, if used
+├── knowledge.owl                           # project state
+└── <application source and tests>
+```
+
+Only add the host-specific file for the tool you actually use. These files instruct an agent; they do not install the skill or execute the mediator by themselves. Install OntoLink and ensure the host can run Python 3.10+ before relying on automatic context retrieval.
