@@ -1,0 +1,6 @@
+MANDATORY ONTOLOGY-FIRST WORKFLOW
+
+Before research, reading arbitrary specifications, or editing code, follow .ontolinkRule/ONTOLOGY-FIRST.md. First run:
+python .agents/skills/ontolink-skills/scripts/mediator.py context --state knowledge.owl
+
+If knowledge.owl is missing, bootstrap it with the installed OntoLink mediator and then run context. Use the context packet to choose the eligible task and read only listed artifacts/contracts. Never edit knowledge.owl manually. All state updates must use mediator.py record with the observed --expected-revision. Enforce discover -> design -> plan -> build -> verify -> deliver -> monitor. DONE requires current PASS evidence and exact SHA-256 hashes.
