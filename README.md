@@ -1,4 +1,4 @@
-# OntoLink â€” Skills & Knowledge Orchestration
+# OntoLink  Skills & Knowledge Orchestration
 
 **Ontology-mediated project execution, from discovery to monitoring.**
 
