@@ -1,4 +1,4 @@
-# OntoLink — Skills & Knowledge Orchestration
+# OntoLink â€” Skills & Knowledge Orchestration
 
 **Ontology-mediated project execution, from discovery to monitoring.**
 
@@ -78,12 +78,25 @@ likelihood concerns a named event and time horizon. Neither closes tasks nor
 overrides blockers. Recording a message does not send it; sent-message records
 require a real external receipt and an authorized communication action.
 
-## Install from the terminal
+## Install with npx
 
-The complete setup requires Git, Python 3.10+ and an existing application project.
-Use a separate distribution checkout outside the application. Set `--skills-dir`
-to the project skill directory supported by your agent; `.agents/skills` is the
-default used in these examples.
+With Node.js/npm available, install all eight skill packages for all supported
+agents:
+
+```sh
+npx skills add asgmodel/ontolink-skills --all
+```
+
+`--all` selects all skills and all agents and skips confirmation prompts.
+Python 3.10+ is required to run the OntoLink mediator. The community Skills CLI
+manages the skill packages; external project rules and initialization require
+complete project setup below. Reload agent instructions if the host requires it.
+
+### Complete project setup
+
+For the external `.rule` integration, managed `AGENTS.md` and `GEMINI.md` blocks,
+backups, compatibility checks and initial context, use a separate distribution
+checkout. Set the actual skill directory supported by your host:
 
 ```sh
 git clone https://github.com/asgmodel/ontolink-skills.git /path/to/ontolink-distribution
@@ -91,21 +104,10 @@ python /path/to/ontolink-distribution/scripts/project_setup.py \
   --project /path/to/my-project --skills-dir .agents/skills
 ```
 
-Setup installs all eight skills and the external rules, merges a managed block
-into `AGENTS.md` and `GEMINI.md`, and returns fresh project context. Replaced files
-are backed up under `.ontolink/backups/`; unrelated skills, user instructions and
-application files are preserved. Reload your agent if its host requires it to
-discover installed or updated skills.
-
-The optional community installer can install the skill packages for a supported
-agent when Node.js/npm is available:
-
-```sh
-npx skills add asgmodel/ontolink-skills --skill '*' --agent codex --yes
-```
-
-This installs packages only. Use the complete Python setup for the external rules
-and project initialization. Choose one installation method for a target directory.
+Setup copies all eight packages and rules, preserves unrelated skills and project
+files, and backs up replaced files under `.ontolink/backups/`. It manages copied
+packages itself; do not assume those copies are registered in the npx installer's
+lock data. Use the update method corresponding to the installation you actually have.
 
 ## First use and everyday operation
 
@@ -148,7 +150,151 @@ For an existing explicit state path, pass `--state path/to/existing.owl` on ever
 setup and wrapper command. Generated `.ontolink` files remain beside that state
 file, preserving the mediator's relative-path contract.
 
+## Core mediator: commands and options
+
+`skills/ontolink-skills/scripts/mediator.py` is the core engine for project state,
+routing, evidence checks and guarded writes. The `.rule/ontolink.py` adapter calls
+this engine and adds fixed generated-file placement, receipts and automatic
+context refresh. Direct mediator calls remain available for explicit control.
+
+In the examples below, resolve the installed coordinator and replace the paths:
+
+```sh
+ONTO_MEDIATOR="/actual/path/to/ontolink-skills/scripts/mediator.py"
+ONTO_STATE="/absolute/path/to/project/knowledge.owl"
+```
+
+| Command | Responsibility | Required options |
+| --- | --- | --- |
+| `bootstrap` | Create or validate and reuse root `knowledge.owl`; return context. | None; set `--root` explicitly for the target project. |
+| `init` | Deliberately create a new, named state; refuse to overwrite an existing file. | `--project`, `--title`, `--output` |
+| `context` | Validate state and return the selected task, phase skill, dependencies, evidence and gates. | `--state` |
+| `record` | Upsert one JSON record, apply dependency impact and commit with a revision guard. | `--state`, `--input`, `--expected-revision` |
+| `validate` | Check state structure, local provenance and workflow rules without modifying state. | `--state` |
+
+For basic state monitoring, use `context` and `validate`. There is no continuous
+`watch` or `monitor` command in this CLI.
+
+### `bootstrap`: start or resume
+
+```sh
+python "$ONTO_MEDIATOR" bootstrap --root /absolute/path/to/project
+```
+
+- `--root PATH`: existing target directory; defaults to the current directory.
+- `--project ID`: optional initial project ID; otherwise inferred from the directory.
+- `--title TEXT`: optional initial title; otherwise the directory name.
+
+The optional identity/title apply only to new state. Existing state is validated
+and reused without resetting progress. Output includes `state`, `created` and
+`context`. Bootstrap always uses `<root>/knowledge.owl`; for an already-configured
+custom state path, query that state directly instead of bootstrapping another graph.
+
+### `init`: create an explicitly named new state
+
+```sh
+python "$ONTO_MEDIATOR" init --project research-project \
+  --title "Research Project" --output /absolute/path/to/new-project/knowledge.owl
+```
+
+All three options are required. `--project` accepts a lowercase letter or digit
+followed by lowercase letters, digits or hyphens, up to 64 characters in total.
+`--output` is the new state path. Use `init` as a deliberate alternative to
+bootstrap, not as an extra step for an existing project. It returns initial context.
+
+### `context`: inspect current work
+
+```sh
+python "$ONTO_MEDIATOR" context --state "$ONTO_STATE"
+python "$ONTO_MEDIATOR" context --state "$ONTO_STATE" \
+  --task task-discover --budget 4000
+```
+
+- `--state PATH`: required canonical state file.
+- `--task ID`: optional focused task, including a blocked task. Without it, the
+  mediator selects the currently eligible task.
+- `--budget NUMBER`: positive integer; default `4000`. This is a byte-based token
+  estimate for the packet, not a provider token count. Mandatory facts are retained
+  and overflow is reported rather than silently removing evidence or blockers.
+
+The JSON packet includes the revision, progress, `active_task`, `workflow_skill`,
+relevant context and signals. Use its observed revision for the next record.
+A context query validates current files; it does not silently reconcile changed
+artifact bytes or rewrite canonical state.
+
+### `record`: persist a factual change
+
+```sh
+python "$ONTO_MEDIATOR" record --state "$ONTO_STATE" \
+  --input /absolute/path/to/project/.ontolink/records/scope-001.json \
+  --expected-revision 0
+```
+
+- `--state PATH`: required canonical state file.
+- `--input PATH`: required JSON file containing one record, using the coordinator's
+  record contract. Keep generated payloads under `.ontolink/records/`.
+- `--expected-revision NUMBER`: required integer matching the current graph revision.
+  Zero is an example for newly initialized state, not a value to reuse blindly.
+
+A successful write increments the revision, adds an audit event and returns
+`revision`, `recorded` and `invalidated`. Dependency changes can reopen tasks and
+stale dependent artifacts. Invalid records, unmet gates, revision conflicts or
+active writer locks are not bypassed. On conflict, reread current context and
+reconcile before retrying.
+
+Direct `record` does not return or save a fresh context packet. After a successful
+write, validate and query again, or use `.rule/ontolink.py record` for automatic
+validation, receipts and context refresh:
+
+```sh
+python "$ONTO_MEDIATOR" validate --state "$ONTO_STATE"
+python "$ONTO_MEDIATOR" context --state "$ONTO_STATE"
+```
+
+### `validate`: check the canonical graph
+
+```sh
+python "$ONTO_MEDIATOR" validate --state "$ONTO_STATE"
+```
+
+`--state PATH` is required. Checks include supported graph structure, project
+membership, dependency references/cycles, phase/status rules, artifact/proof
+hashes, blockers and evidence gates. Success returns `status: VALID`, task count,
+revision and the validation scope. This checks local provenance and workflow;
+it does not prove that a test log demonstrates correctness or authenticate an
+external receipt. The command does not reset, repair or migrate state.
+
+### Shared options and command help
+
+`--ontology PATH` is optional and defaults to the coordinator's bundled
+`assets/ontolink.owl`. It is a global option and must appear **before** the command:
+
+```sh
+python "$ONTO_MEDIATOR" --ontology /path/to/ontolink.owl \
+  context --state "$ONTO_STATE"
+python "$ONTO_MEDIATOR" --help
+python "$ONTO_MEDIATOR" record --help
+```
+
+Use `COMMAND --help` for the options of any of the five commands. Supply a custom
+ontology only when it is intentionally compatible with the existing project's
+vocabulary and workflow; it is not a way to bypass completion gates.
+
 ## Update skills while keeping project data
+
+A prompt is optional: it asks an agent to execute commands. For packages already
+installed and registered through the Skills CLI, run the update directly from
+the project directory:
+
+```sh
+npx skills update ontolink-skills ontolink-discovery ontolink-architecture \
+  ontolink-planning ontolink-implementation ontolink-verification \
+  ontolink-delivery ontolink-monitoring --project
+```
+
+This targets the eight OntoLink packages in the project scope. It does not update
+the repository's external `.rule` integration. For packages installed as copies
+by `project_setup.py`, use the distribution-and-setup update commands below instead.
 
 An existing project can receive new skill instructions, scripts and commands
 without rebuilding its knowledge graph. Stop active agent work, then run these
@@ -232,12 +378,54 @@ skills also provide state and validation. OntoLink coordinates them without
 replacing their capabilities. Markdown remains useful alongside the graph for
 long explanations and narrative decisions.
 
+## Python files and their responsibilities
+
+### Distribution scripts: `scripts/`
+
+| File | Responsibility |
+| --- | --- |
+| [project_setup.py](https://github.com/asgmodel/ontolink-skills/blob/main/scripts/project_setup.py) | Installs or updates copied packages and external rules; backs up replaced paths, checks graph compatibility, preserves project state and rolls back replaced files on failure. |
+| [check.py](https://github.com/asgmodel/ontolink-skills/blob/main/scripts/check.py) | Runs distribution checks: skill metadata, OWL/Turtle equivalence, SHACL, mediator validation, regression suites and sitemap completeness. |
+| [generate_sitemap.py](https://github.com/asgmodel/ontolink-skills/blob/main/scripts/generate_sitemap.py) | Builds or checks sitemap.xml from the public skill documentation and reference pages. |
+| [test_project_rules.py](https://github.com/asgmodel/ontolink-skills/blob/main/scripts/test_project_rules.py) | Tests fixed generated-file paths, post-record context refresh, revisions, locks, explicit state paths and failure recovery. |
+| [test_project_setup.py](https://github.com/asgmodel/ontolink-skills/blob/main/scripts/test_project_setup.py) | Tests installation and updates, preserved registered knowledge/proof, new package files, unrelated instructions, rollback and path boundaries. |
+
+### Coordinator runtime: `skills/ontolink-skills/scripts/`
+
+| File | Responsibility |
+| --- | --- |
+| [mediator.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/mediator.py) | Core state engine: bootstrap, init, context, record and validate. Selects eligible tasks, computes progress, checks blockers and evidence, invalidates dependent work, and guards atomic revisioned writes. |
+| [rdf_store.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/rdf_store.py) | Reads and writes the supported named-node RDF/XML triples. It is a constrained store, not a general OWL reasoner. |
+| [project_indexer.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/project_indexer.py) | Builds or incrementally refreshes the generated code index with file hashes and lightweight symbols; it does not write canonical project state. |
+| [retrieval.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/retrieval.py) | Ranks canonical knowledge and generated code hints using local BM25 lexical scores and graph-neighbor signals. |
+| [context_compiler.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/context_compiler.py) | Adds budgeted optional retrieval hints while preserving the original mediator packet and its mandatory facts. |
+| [project_intelligence.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/project_intelligence.py) | Command-line entry point for optional index, search and enriched context operations. |
+| [benchmark_agent_iq.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/benchmark_agent_iq.py) | Runs a synthetic retrieval timing/ranking smoke benchmark. Its name does not imply a scientific intelligence or model-quality measurement. |
+| [test_mediator.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/test_mediator.py) | Tests phase gates, evidence, dependency invalidation, uncertainty, communications, revisions, locking and parser boundaries. |
+| [test_project_intelligence.py](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-skills/scripts/test_project_intelligence.py) | Tests generated-index separation, incremental refresh, combined retrieval and preservation of mediator packet fields. |
+
+### What performs monitoring?
+
+`mediator.py` contains the core state inspection: progress, blockers, warnings,
+current evidence and dependency impact. Its `context` and `validate` commands
+perform checks when invoked. Changed upstream knowledge is reconciled through
+records; querying context does not silently rewrite canonical state.
+
+The external [`.rule/ontolink.py`](https://github.com/asgmodel/ontolink-skills/blob/main/.rule/ontolink.py) adapter
+orchestrates those checks, refreshes context after successful records and on
+resume, and rebuilds an already-enabled optional index.
+
+The [ontolink-monitoring phase skill](https://github.com/asgmodel/ontolink-skills/blob/main/skills/ontolink-monitoring/SKILL.md)
+defines the agent's monitoring procedure. There is no standalone `monitor.py`,
+filesystem watcher or always-running monitoring service in this repository.
+
 ## Frequently asked questions
 
 ### What happens when an update adds commands to a project that already has data?
 
-Run the two update commands above. They update package code and rules while
-retaining the separate project graph and durable files. New commands can use that
+Use the update path that matches the installation method above. Package updates
+retain the separate project graph and durable files; the complete setup path also
+synchronizes external rules. New commands can use that
 state if the format remains compatible; updating a package is not proof of migration.
 
 ### Does the ontology eliminate hallucinations or prove a product is correct?
